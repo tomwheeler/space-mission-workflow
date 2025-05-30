@@ -36,13 +36,13 @@ class space_mission_workflow:
 
     @workflow.run
     async def run(self) -> str:
-        self.status = "countdown"
+        self.status = "launching"
         for t in [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]:
             await workflow.sleep(timedelta(seconds=1))
 
-        self.status = "launched"
+        self.status = "orbiting"
         while not self.return_home:
-            # Retry data collection if not completed within 30 seconds
+            # Read probes, retrying if not completed within 30 seconds
             data = await workflow.execute_activity(
                 read_probes, start_to_close_timeout=timedelta(seconds=30)
             )
@@ -53,7 +53,6 @@ class space_mission_workflow:
                     **data
                 )
             )
-            self.status = "orbiting"
             # Pause 5 minutes unless requested to return home
             await workflow.wait_condition(
                 lambda: self.return_home, timeout=timedelta(minutes=5)
